@@ -154,7 +154,6 @@ class LatestFrameCamera:
         with self._condition:
             ready = self._condition.wait_for(
                 lambda: self._sequence != self._last_sequence
-                or self._read_failed
                 or self._error is not None
                 or not self._running,
                 timeout=timeout,
