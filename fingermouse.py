@@ -123,7 +123,6 @@ class LatestFrameCamera:
         self._sequence = 0
         self._last_sequence = 0
         self._condition = threading.Condition()
-        self._read_failed = False
         self._error = None
         self._running = True
         self._thread = threading.Thread(target=self._reader, daemon=True)
@@ -140,13 +139,10 @@ class LatestFrameCamera:
                 return
             with self._condition:
                 self._ok = ok
-                self._read_failed = not ok
                 if ok:
                     self._frame = frame
                     self._sequence += 1
-                else:
-                    self._frame = None
-                self._condition.notify_all()
+                    self._condition.notify_all()
             if not ok:
                 time.sleep(0.01)
 
@@ -154,7 +150,6 @@ class LatestFrameCamera:
         with self._condition:
             ready = self._condition.wait_for(
                 lambda: self._sequence != self._last_sequence
-                or self._read_failed
                 or self._error is not None
                 or not self._running,
                 timeout=timeout,
